@@ -1,0 +1,87 @@
+import tkinter as tk
+from tkinter import messagebox
+from tkinter import scrolledtext
+import datetime
+
+class DreamJournalApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Dream Journal App")
+
+        self.entries = []
+        self.create_widgets()
+
+    def create_widgets(self):
+        self.dream_label = tk.Label(self.root, text="Write down your dream:")
+        self.dream_label.pack()
+
+        self.dream_text = scrolledtext.ScrolledText(self.root, height=6, width=40)
+        self.dream_text.pack()
+
+        self.save_button = tk.Button(self.root, text="Save Dream", command=self.save_dream)
+        self.save_button.pack()
+
+        self.show_entries_button = tk.Button(self.root, text="Show Entries", command=self.show_entries)
+        self.show_entries_button.pack()
+
+        self.analyze_button = tk.Button(self.root, text="Analyze Dreams", command=self.analyze_dreams)
+        self.analyze_button.pack()
+
+    def save_dream(self):
+        dream_entry = self.dream_text.get("1.0", "end-1c")
+        if dream_entry.strip():
+            timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            self.entries.append((timestamp, dream_entry))
+            self.dream_text.delete("1.0", tk.END)
+            messagebox.showinfo("Dream Saved", "Dream entry saved successfully!")
+        else:
+            messagebox.showwarning("Empty Entry", "Please write something before saving.")
+
+    def show_entries(self):
+        if self.entries:
+            entries_window = tk.Toplevel(self.root)
+            entries_window.title("Dream Entries")
+
+            entries_text = tk.Text(entries_window, wrap=tk.WORD)
+            entries_text.pack()
+
+            for timestamp, entry in self.entries:
+                entries_text.insert(tk.END, f"Date & Time: {timestamp}\n")
+                entries_text.insert(tk.END, f"Dream:\n{entry}\n\n")
+                entries_text.insert(tk.END, "-" * 40 + "\n\n")
+        else:
+            messagebox.showinfo("No Entries", "No dream entries to display.")
+
+    def analyze_dreams(self):
+        if self.entries:
+            analysis_window = tk.Toplevel(self.root)
+            analysis_window.title("Dream Analysis")
+
+            analysis_text = tk.Text(analysis_window, wrap=tk.WORD)
+            analysis_text.pack()
+
+            dream_keywords = ["water", "flying", "falling", "running", "people", "animals"]  # Sample keywords
+
+            for timestamp, entry in self.entries:
+                entry_analysis = []
+                rating = 0  # Initialize dream rating
+                for keyword in dream_keywords:
+                    if keyword in entry.lower():
+                        entry_analysis.append(f"Found keyword '{keyword}' in the dream.")
+                        rating += 1  # Increase rating if keyword is found
+                if entry_analysis:
+                    analysis_text.insert(tk.END, f"Date & Time: {timestamp}\n")
+                    analysis_text.insert(tk.END, f"Dream:\n{entry}\n")
+                    analysis_text.insert(tk.END, "\n".join(entry_analysis) + "\n")
+                    analysis_text.insert(tk.END, f"Dream Rating: {rating} / {len(dream_keywords)}\n")
+                    analysis_text.insert(tk.END, "-" * 40 + "\n\n")
+        else:
+            messagebox.showinfo("No Entries", "No dream entries to analyze.")
+
+def main():
+    root = tk.Tk()
+    app = DreamJournalApp(root)
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
